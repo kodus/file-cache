@@ -1,0 +1,32 @@
+{
+    "name": "kodus/file-cache",
+    "description": "Minimal PSR-16 cache-implementation",
+    "authors": [
+        {
+            "name": "Rasmus Schultz",
+            "email": "rasc@jfmedier.dk",
+            "role": "Developer"
+        }
+    ],
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">= 5.6",
+        "psr/simple-cache": "^0.2"
+    },
+    "require-dev": {
+        "codeception/codeception": "^2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kodus\\Cache\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kodus\\Cache\\Test\\": "tests/",
+            "Kodus\\Cache\\Test\\Integration\\": "tests/integration/"
+        }
+    }
+}
