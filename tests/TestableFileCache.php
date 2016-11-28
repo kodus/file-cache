@@ -5,15 +5,25 @@ namespace Kodus\Cache\Test;
 use Kodus\Cache\FileCache;
 
 /**
- * File cache extension for testing - allows us to skip forward in time ;-)
+ * File cache extension for testing - makes time stand still and allows us to time-travel ;-)
  */
 class TestableFileCache extends FileCache
 {
-    protected $time_skip = 0;
+    /**
+     * @var int
+     */
+    protected $time_frozen;
+
+    public function __construct($cache_path, $default_ttl)
+    {
+        parent::__construct($cache_path, $default_ttl);
+
+        $this->time_frozen = parent::getTime();
+    }
 
     protected function getTime()
     {
-        return parent::getTime() + $this->time_skip;
+        return $this->time_frozen;
     }
 
     /**
@@ -21,6 +31,16 @@ class TestableFileCache extends FileCache
      */
     public function skipTime($seconds)
     {
-        $this->time_skip += $seconds;
+        $this->time_frozen += $seconds;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return string
+     */
+    public function getCachePath($key)
+    {
+        return $this->getPath($key);
     }
 }

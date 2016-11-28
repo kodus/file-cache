@@ -7,7 +7,7 @@ use DateInterval;
 use IntegrationTester;
 use Kodus\Cache\Test\TestableFileCache;
 
-class SimpleFileCacheCest
+class FileCacheCest
 {
     /**
      * @var int
@@ -61,7 +61,7 @@ class SimpleFileCacheCest
     {
         $this->cache->set("key", "value", 10);
 
-        $this->cache->skipTime(6);
+        $this->cache->skipTime(5);
         
         $I->assertSame("value", $this->cache->get("key"));
 
@@ -74,11 +74,10 @@ class SimpleFileCacheCest
     public function expirationByInterval(IntegrationTester $I)
     {
         $interval = new DateInterval("PT10S");
-        $interval->invert = 1;
 
         $this->cache->set("key", "value", $interval);
 
-        $this->cache->skipTime(6);
+        $this->cache->skipTime(5);
 
         $I->assertSame("value", $this->cache->get("key"));
 
@@ -102,6 +101,15 @@ class SimpleFileCacheCest
         $I->assertSame("default", $this->cache->get("key", "default"));
     }
 
+    public function expirationInThePast(IntegrationTester $I)
+    {
+        $this->cache->set("key1", "value1", 0);
+        $this->cache->set("key2", "value2", -10);
+
+        $I->assertSame("default", $this->cache->get("key1", "default"));
+        $I->assertSame("default", $this->cache->get("key2", "default"));
+    }
+
     public function clear(IntegrationTester $I)
     {
         // add some values that should be gone when we clear cache:
@@ -118,6 +126,19 @@ class SimpleFileCacheCest
 
         $I->assertSame(null, $this->cache->get("key2"));
         $I->assertSame("default", $this->cache->get("key2", "default"));
+    }
+
+    public function cleanExpired(IntegrationTester $I)
+    {
+        $this->cache->set("key1", "value1", 10);
+        $this->cache->set("key2", "value2", 30);
+
+        $this->cache->skipTime(20);
+
+        $this->cache->cleanExpired();
+
+        $I->assertFileNotExists($this->cache->getCachePath("key1"), "file has expired");
+        $I->assertFileExists($this->cache->getCachePath("key2"), "file has not expired");
     }
 
     public function testGetAndSetMultiple(IntegrationTester $I)

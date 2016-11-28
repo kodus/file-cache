@@ -4,6 +4,7 @@ namespace Kodus\Cache;
 
 use DateInterval;
 use FilesystemIterator;
+use Generator;
 use InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\CounterInterface;
@@ -63,29 +64,23 @@ class FileCache implements CacheInterface, CounterInterface
     {
         $path = $this->getPath($key);
 
-        if (! file_exists($path)) {
+        $expires_at = @filemtime($path);
+
+        if ($expires_at === false) {
             return $default; // file not found
         }
 
-        $file = @fopen($path, 'rb');
-
-        if ($file === false) {
-            return $default; // file not found
-        }
-
-        $expires_at = intval(fgets($file));
-
-        if ($this->getTime() > $expires_at) {
-            fclose($file);
-
-            @unlink($path);
+        if ($this->getTime() >= $expires_at) {
+            @unlink($path); // file expired
 
             return $default;
         }
 
-        $data = stream_get_contents($file);
+        $data = @file_get_contents($path);
 
-        fclose($file);
+        if ($data === false) {
+            return $default; // race condition: file not found
+        }
 
         if ($data === 'b:0;') {
             return false; // because we can't otherwise distinguish a FALSE return-value from unserialize()
@@ -112,30 +107,21 @@ class FileCache implements CacheInterface, CounterInterface
 
         $temp_path = $this->cache_path . DIRECTORY_SEPARATOR . uniqid('', true);
 
-        $data = serialize($value);
-
-        if ($ttl instanceof DateInterval) {
-            $ttl = ($ttl->s)
-                + ($ttl->i * 60)
-                + ($ttl->h * 60 * 60)
-                + ($ttl->d * 60 * 60 * 24)
-                + ($ttl->m * 60 * 60 * 24 * 30)
-                + ($ttl->y * 60 * 60 * 24 * 365);
+        if (is_int($ttl)) {
+            $expires_at = $this->getTime() + $ttl;
+        } elseif ($ttl instanceof DateInterval) {
+            $expires_at = date_create_from_format("U", $this->getTime())->add($ttl)->getTimestamp();
         } elseif ($ttl === null) {
-            $ttl = $this->default_ttl;
-        }
-
-        if (! is_int($ttl)) {
+            $expires_at = $this->getTime() + $this->default_ttl;
+        } else {
             throw new InvalidArgumentException("invalid TTL: " . print_r($ttl, true));
         }
 
-        $expires_at = $this->getTime() + $ttl;
-
-        if (false === @file_put_contents($temp_path, "{$expires_at}\n{$data}")) {
+        if (false === @file_put_contents($temp_path, serialize($value))) {
             return false;
         }
 
-        if (@rename($temp_path, $path)) {
+        if (@touch($temp_path, $expires_at) && @rename($temp_path, $path)) {
             return true;
         }
 
@@ -151,18 +137,9 @@ class FileCache implements CacheInterface, CounterInterface
 
     public function clear()
     {
-        $iterator = new RecursiveDirectoryIterator(
-            $this->cache_path,
-            FilesystemIterator::CURRENT_AS_PATHNAME | FilesystemIterator::SKIP_DOTS
-        );
+        $paths = $this->listPaths();
 
-        $iterator = new RecursiveIteratorIterator($iterator);
-
-        foreach ($iterator as $path) {
-            if (is_dir($path)) {
-                continue; // leave directories in place, so we don't have to create them again
-            }
-
+        foreach ($paths as $path) {
             @unlink($path);
         }
     }
@@ -232,6 +209,30 @@ class FileCache implements CacheInterface, CounterInterface
     }
 
     /**
+     * Clean up expired cache-files.
+     *
+     * This method is outside the scope of the PSR-16 cache concept, and is specific to
+     * this implementation, being a file-cache.
+     *
+     * In scenarios with dynamic keys (such as Session IDs) you should call this method
+     * periodically - for example from a scheduled daily cron-job.
+     *
+     * @return void
+     */
+    public function cleanExpired()
+    {
+        $now = $this->getTime();
+
+        $paths = $this->listPaths();
+
+        foreach ($paths as $path) {
+            if ($now > filemtime($path)) {
+                @unlink($path);
+            }
+        }
+    }
+
+    /**
      * For a given cache key, obtain the absolute file path
      *
      * @param string $key
@@ -246,7 +247,7 @@ class FileCache implements CacheInterface, CounterInterface
             throw new InvalidArgumentException("invalid character in key: {$match[0]}");
         }
 
-        $hash = sha1(static::class . $key);
+        $hash = hash("sha256", $key);
 
         return $this->cache_path
             . DIRECTORY_SEPARATOR
@@ -263,5 +264,26 @@ class FileCache implements CacheInterface, CounterInterface
     protected function getTime()
     {
         return time();
+    }
+
+    /**
+     * @return Generator|string[]
+     */
+    protected function listPaths()
+    {
+        $iterator = new RecursiveDirectoryIterator(
+            $this->cache_path,
+            FilesystemIterator::CURRENT_AS_PATHNAME | FilesystemIterator::SKIP_DOTS
+        );
+
+        $iterator = new RecursiveIteratorIterator($iterator);
+
+        foreach ($iterator as $path) {
+            if (is_dir($path)) {
+                continue; // ignore directories
+            }
+
+            yield $path;
+        }
     }
 }
