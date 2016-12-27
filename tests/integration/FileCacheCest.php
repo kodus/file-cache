@@ -27,9 +27,7 @@ class FileCacheCest
 
         $this->cache = new TestableFileCache($path, self::DEFAULT_EXPIRATION);
 
-        FileSystem::doEmptyDir($path);
-
-        assert(fileExists($path));
+        assert(file_exists($path));
         
         assert(is_writable($path));
     }
