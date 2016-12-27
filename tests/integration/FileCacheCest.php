@@ -23,10 +23,7 @@ class FileCacheCest
     {
         $path = dirname(__DIR__) . "/_output/cache";
 
-        // Remove cache directory if exists
-        if (file_exists($path)) {
-            @rmdir($path);
-        }
+        FileSystem::deleteDir($path);
 
         $this->cache = new TestableFileCache($path, self::DEFAULT_EXPIRATION);
 
