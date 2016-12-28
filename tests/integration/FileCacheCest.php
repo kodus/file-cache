@@ -23,13 +23,13 @@ class FileCacheCest
     {
         $path = dirname(__DIR__) . "/_output/cache";
 
-        @mkdir($path, 0777);
-
-        FileSystem::doEmptyDir($path);
-
-        assert(is_writable($path));
+        FileSystem::deleteDir($path);
 
         $this->cache = new TestableFileCache($path, self::DEFAULT_EXPIRATION);
+
+        assert(file_exists($path));
+        
+        assert(is_writable($path));
     }
 
     public function _after()
@@ -62,7 +62,7 @@ class FileCacheCest
         $this->cache->set("key", "value", 10);
 
         $this->cache->skipTime(5);
-        
+
         $I->assertSame("value", $this->cache->get("key"));
 
         $this->cache->skipTime(5);
