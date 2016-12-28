@@ -47,7 +47,7 @@ class FileCache implements CacheInterface, CounterInterface
     public function __construct($cache_path, $default_ttl)
     {
         if (! file_exists($cache_path) && file_exists(dirname($cache_path))) {
-            @mkdir($cache_path, 0777, true); // ensure that the parent path exists
+            @mkdir($cache_path, 0777); // ensure that the parent path exists
         }
 
         $path = realpath($cache_path);
