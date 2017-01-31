@@ -13,7 +13,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">= 5.6",
-        "psr/simple-cache": "^0.2"
+        "psr/simple-cache": "^1"
     },
     "require-dev": {
         "codeception/codeception": "^2"

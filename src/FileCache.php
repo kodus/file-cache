@@ -7,7 +7,6 @@ use FilesystemIterator;
 use Generator;
 use InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
-use Psr\SimpleCache\CounterInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -19,7 +18,7 @@ use RecursiveIteratorIterator;
  *
  * @link https://github.com/matthiasmullie/scrapbook/
  */
-class FileCache implements CacheInterface, CounterInterface
+class FileCache implements CacheInterface
 {
     // TODO garbage collection
 
@@ -148,12 +147,12 @@ class FileCache implements CacheInterface, CounterInterface
         }
     }
 
-    public function getMultiple($keys)
+    public function getMultiple($keys, $default = null)
     {
         $values = [];
 
         foreach ($keys as $key) {
-            $values[$key] = $this->get($key);
+            $values[$key] = $this->get($key) ?: $default;
         }
 
         return $values;

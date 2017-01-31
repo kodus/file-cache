@@ -143,11 +143,11 @@ class FileCacheCest
 
     public function testGetAndSetMultiple(IntegrationTester $I)
     {
-        $this->cache->setMultiple(["key1" => "value1", "key2" => "value2"]);
+        $this->cache->setMultiple(["key1" => "value1", "key2" => "value2"], false);
 
         $results = $this->cache->getMultiple(["key1", "key2", "key3"]);
 
-        $I->assertSame(["key1" => "value1", "key2" => "value2", "key3" => null], $results);
+        $I->assertSame(["key1" => "value1", "key2" => "value2", "key3" => false], $results);
     }
 
     public function testDeleteMultiple(IntegrationTester $I)
