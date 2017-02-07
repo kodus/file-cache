@@ -5,6 +5,7 @@ namespace Kodus\Cache\Test\Integration;
 use Codeception\Util\FileSystem;
 use DateInterval;
 use IntegrationTester;
+use Kodus\Cache\InvalidArgumentException;
 use Kodus\Cache\Test\TestableFileCache;
 
 class FileCacheCest
@@ -28,7 +29,7 @@ class FileCacheCest
         $this->cache = new TestableFileCache($path, self::DEFAULT_EXPIRATION);
 
         assert(file_exists($path));
-        
+
         assert(is_writable($path));
     }
 
@@ -45,10 +46,23 @@ class FileCacheCest
         $I->assertSame("value1", $this->cache->get("key1"));
         $I->assertSame("value2", $this->cache->get("key2"));
 
-        $this->cache->delete("key1");
+        $I->assertTrue($this->cache->delete("key1"));
+        $I->assertFalse($this->cache->delete("key1"));
 
         $I->assertSame(null, $this->cache->get("key1"));
         $I->assertSame("value2", $this->cache->get("key2"));
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->set("key@", "value1");
+        });
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->get("key@");
+        });
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->delete("key@");
+        });
     }
 
     public function getNonExisting(IntegrationTester $I)
@@ -117,7 +131,7 @@ class FileCacheCest
         $this->cache->set("key1", "value1");
         $this->cache->set("key2", "value2");
 
-        $this->cache->clear();
+        $I->assertTrue($this->cache->clear());
 
         // check to confirm everything"s been wiped out:
 
@@ -145,9 +159,25 @@ class FileCacheCest
     {
         $this->cache->setMultiple(["key1" => "value1", "key2" => "value2"]);
 
-        $results = $this->cache->getMultiple(["key1", "key2", "key3"]);
+        $results = $this->cache->getMultiple(["key1", "key2", "key3"], false);
 
-        $I->assertSame(["key1" => "value1", "key2" => "value2", "key3" => null], $results);
+        $I->assertSame(["key1" => "value1", "key2" => "value2", "key3" => false], $results);
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->getMultiple("Invalid type");
+        });
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->setMultiple("Invalid type");
+        });
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->setMultiple(["Invalid key@" => "value1"]);
+        });
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->getMultiple(["Invalid key@"]);
+        });
     }
 
     public function testDeleteMultiple(IntegrationTester $I)
@@ -159,6 +189,14 @@ class FileCacheCest
         $I->assertSame(["key1" => null, "key2" => null], $this->cache->getMultiple(["key1", "key2"]));
 
         $I->assertSame("value3", $this->cache->get("key3"));
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->deleteMultiple("Invalid type");
+        });
+
+        $I->expectException(InvalidArgumentException::class, function () {
+            $this->cache->deleteMultiple(["Invalid key@"]);
+        });
     }
 
     public function testHas(IntegrationTester $I)

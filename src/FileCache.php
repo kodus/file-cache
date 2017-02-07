@@ -5,11 +5,10 @@ namespace Kodus\Cache;
 use DateInterval;
 use FilesystemIterator;
 use Generator;
-use InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
-use Psr\SimpleCache\CounterInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Traversable;
 
 /**
  * This is a simple, file-based cache implementation, which is bootstrapped by
@@ -19,7 +18,7 @@ use RecursiveIteratorIterator;
  *
  * @link https://github.com/matthiasmullie/scrapbook/
  */
-class FileCache implements CacheInterface, CounterInterface
+class FileCache implements CacheInterface
 {
     // TODO garbage collection
 
@@ -136,34 +135,49 @@ class FileCache implements CacheInterface, CounterInterface
 
     public function delete($key)
     {
-        @unlink($this->getPath($key));
+        return @unlink($this->getPath($key));
     }
 
     public function clear()
     {
+        $success = true;
+
         $paths = $this->listPaths();
 
         foreach ($paths as $path) {
-            @unlink($path);
+            if (! unlink($path)) {
+                $success = false;
+            }
         }
+
+        return $success;
     }
 
-    public function getMultiple($keys)
+    public function getMultiple($keys, $default = null)
     {
+        if (! is_array($keys) && ! $keys instanceof Traversable) {
+            throw new InvalidArgumentException("keys must be either of type array or Traversable");
+        }
+
         $values = [];
 
         foreach ($keys as $key) {
-            $values[$key] = $this->get($key);
+            $values[$key] = $this->get($key) ?: $default;
         }
 
         return $values;
     }
 
-    public function setMultiple($items, $ttl = null)
+    public function setMultiple($values, $ttl = null)
     {
+        if (! is_array($values) && ! $values instanceof Traversable) {
+            throw new InvalidArgumentException("keys must be either of type array or Traversable");
+        }
+
         $ok = true;
 
-        foreach ($items as $key => $value) {
+        foreach ($values as $key => $value) {
+            $this->validateKey($key);
             $ok = $this->set($key, $value, $ttl) && $ok;
         }
 
@@ -172,7 +186,12 @@ class FileCache implements CacheInterface, CounterInterface
 
     public function deleteMultiple($keys)
     {
+        if (! is_array($keys) && ! $keys instanceof Traversable) {
+            throw new InvalidArgumentException("keys must be either of type array or Traversable");
+        }
+
         foreach ($keys as $key) {
+            $this->validateKey($key);
             $this->delete($key);
         }
     }
@@ -247,9 +266,7 @@ class FileCache implements CacheInterface, CounterInterface
      */
     protected function getPath($key)
     {
-        if (preg_match(self::PSR16_RESERVED, $key, $match) === 1) {
-            throw new InvalidArgumentException("invalid character in key: {$match[0]}");
-        }
+        $this->validateKey($key);
 
         $hash = hash("sha256", $key);
 
@@ -288,6 +305,18 @@ class FileCache implements CacheInterface, CounterInterface
             }
 
             yield $path;
+        }
+    }
+
+    /**
+     * @param string $key
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function validateKey($key)
+    {
+        if (preg_match(self::PSR16_RESERVED, $key, $match) === 1) {
+            throw new InvalidArgumentException("invalid character in key: {$match[0]}");
         }
     }
 }
