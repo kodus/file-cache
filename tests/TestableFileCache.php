@@ -14,9 +14,9 @@ class TestableFileCache extends FileCache
      */
     protected $time_frozen;
 
-    public function __construct($cache_path, $default_ttl)
+    public function __construct($cache_path, $default_ttl, $dir_mode, $file_mode)
     {
-        parent::__construct($cache_path, $default_ttl);
+        parent::__construct($cache_path, $default_ttl, $dir_mode, $file_mode);
 
         $this->time_frozen = parent::getTime();
     }

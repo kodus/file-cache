@@ -36,15 +36,29 @@ class FileCache implements CacheInterface
     private $default_ttl;
 
     /**
+     * @var int
+     */
+    private $dir_mode;
+
+    /**
+     * @var int
+     */
+    private $file_mode;
+
+    /**
      * @param string $cache_path  absolute root path of cache-file folder
      * @param int    $default_ttl default time-to-live (in seconds)
-     *
-     * @throws InvalidArgumentException if the specified cache-path does not exist (or is not writable)
+     * @param int    $dir_mode    permission mode for created dirs
+     * @param int    $file_mode   permission mode for created files
      */
-    public function __construct($cache_path, $default_ttl)
+    public function __construct($cache_path, $default_ttl, $dir_mode = 0775, $file_mode = 0664)
     {
+        $this->default_ttl = $default_ttl;
+        $this->dir_mode = $dir_mode;
+        $this->file_mode = $file_mode;
+
         if (! file_exists($cache_path) && file_exists(dirname($cache_path))) {
-            @mkdir($cache_path, 0777); // ensure that the parent path exists
+            $this->mkdir($cache_path); // ensure that the parent path exists
         }
 
         $path = realpath($cache_path);
@@ -58,7 +72,6 @@ class FileCache implements CacheInterface
         }
 
         $this->cache_path = $path;
-        $this->default_ttl = $default_ttl;
     }
 
     public function get($key, $default = null)
@@ -103,7 +116,8 @@ class FileCache implements CacheInterface
         $dir = dirname($path);
 
         if (! file_exists($dir)) {
-            @mkdir($dir, 0777, true); // ensure that the parent path exists
+            // ensure that the parent path exists:
+            $this->mkdir($dir);
         }
 
         $temp_path = $this->cache_path . DIRECTORY_SEPARATOR . uniqid('', true);
@@ -119,6 +133,10 @@ class FileCache implements CacheInterface
         }
 
         if (false === @file_put_contents($temp_path, serialize($value))) {
+            return false;
+        }
+
+        if (false === @chmod($temp_path, $this->file_mode)) {
             return false;
         }
 
@@ -206,7 +224,7 @@ class FileCache implements CacheInterface
         $dir = dirname($path);
 
         if (! file_exists($dir)) {
-            @mkdir($dir, 0777, true); // ensure that the parent path exists
+            $this->mkdir($dir); // ensure that the parent path exists
         }
 
         $lock_path = $dir . DIRECTORY_SEPARATOR . ".lock"; // allows max. 256 client locks at one time
@@ -316,5 +334,22 @@ class FileCache implements CacheInterface
         if (preg_match(self::PSR16_RESERVED, $key, $match) === 1) {
             throw new InvalidArgumentException("invalid character in key: {$match[0]}");
         }
+    }
+
+    /**
+     * Recursively create directories and apply permission mask
+     *
+     * @param string $path absolute directory path
+     */
+    private function mkdir($path)
+    {
+        $parent_path = dirname($path);
+
+        if (!file_exists($parent_path)) {
+            $this->mkdir($parent_path); // recursively create parent dirs first
+        }
+
+        mkdir($path);
+        chmod($path, $this->dir_mode);
     }
 }

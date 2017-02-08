@@ -20,13 +20,16 @@ class FileCacheCest
      */
     protected $cache;
 
+    const DIR_MODE = 0775;
+    const FILE_MODE = 0664;
+
     public function _before()
     {
         $path = dirname(__DIR__) . "/_output/cache";
 
         FileSystem::deleteDir($path);
 
-        $this->cache = new TestableFileCache($path, self::DEFAULT_EXPIRATION);
+        $this->cache = new TestableFileCache($path, self::DEFAULT_EXPIRATION, self::DIR_MODE, self::FILE_MODE);
 
         assert(file_exists($path));
 
@@ -36,6 +39,27 @@ class FileCacheCest
     public function _after()
     {
         $this->cache->clear();
+    }
+
+    public function applyDirAndFilePermissions(IntegrationTester $I)
+    {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $I->comment("running on Windows - skipping test for *nix file permissions");
+
+            return;
+        }
+
+        $this->cache->set("key1", "value1");
+
+        $path = $this->cache->getCachePath("key1");
+
+        $dir_mode = fileperms(dirname($path)) & 0777;
+
+        $I->assertSame(self::DIR_MODE, $dir_mode, sprintf("dir mode applied: %o", $dir_mode));
+
+        $file_mode = fileperms($path) & 0777;
+
+        $I->assertSame(self::FILE_MODE, $file_mode, sprintf("file mode applied: %o", $file_mode));
     }
 
     public function setGetAndDelete(IntegrationTester $I)
