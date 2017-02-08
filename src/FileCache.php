@@ -53,6 +53,10 @@ class FileCache implements CacheInterface
      */
     public function __construct($cache_path, $default_ttl, $dir_mode = 0775, $file_mode = 0664)
     {
+        $this->default_ttl = $default_ttl;
+        $this->dir_mode = $dir_mode;
+        $this->file_mode = $file_mode;
+
         if (! file_exists($cache_path) && file_exists(dirname($cache_path))) {
             $this->mkdir($cache_path); // ensure that the parent path exists
         }
@@ -68,9 +72,6 @@ class FileCache implements CacheInterface
         }
 
         $this->cache_path = $path;
-        $this->default_ttl = $default_ttl;
-        $this->dir_mode = $dir_mode;
-        $this->file_mode = $file_mode;
     }
 
     public function get($key, $default = null)
