@@ -20,8 +20,6 @@ use Traversable;
  */
 class FileCache implements CacheInterface
 {
-    // TODO garbage collection
-
     /**
      * @var string control characters for keys, reserved by PSR-16
      */
