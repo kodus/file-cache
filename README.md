@@ -26,6 +26,12 @@ To reduce storage overhead and speed up expiration time-checks, the file modific
 
 Please refer to the [PSR-16 spec](https://packagist.org/packages/psr/simple-cache) for the API description.
 
+### Security
+
+In a production setting, consider specifying appropriate `$dir_mode` and `$file_mode` constructor-arguments for
+your hosting environment - the defaults are a typical choice, but you may be able to tighten permissions on your
+system, if needed.
+
 ### Garbage Collection
 
 Because this is a file-based cache, you do need to think about garbage-collection as it relates to your use-case.
