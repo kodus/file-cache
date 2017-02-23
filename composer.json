@@ -6,6 +6,11 @@
             "name": "Rasmus Schultz",
             "email": "rasc@jfmedier.dk",
             "role": "Developer"
+        },
+        {
+            "name": "Thomas Pedersen",
+            "email": "thno@jfmedier.dk",
+            "role": "Developer"
         }
     ],
     "license": "MIT",
