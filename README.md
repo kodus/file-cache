@@ -6,7 +6,7 @@ kodus/file-cache
 [![Code Coverage](https://scrutinizer-ci.com/g/kodus/file-cache/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/kodus/file-cache/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kodus/file-cache/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kodus/file-cache/?branch=master)
 
-This library provides a minimal [PSR-16](https://github.com/php-fig/fig-standards/blob/master/proposed/simplecache.md)
+This library provides a minimal [PSR-16](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-16-simple-cache.md)
 cache-implementation backed by simple file-system storage.
 
 This can be used to provide working, lightweight bootstrapping when you want to ship a project that works
