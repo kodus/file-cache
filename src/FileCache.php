@@ -11,12 +11,9 @@ use RecursiveIteratorIterator;
 use Traversable;
 
 /**
- * This is a simple, file-based cache implementation, which is bootstrapped by
- * the Core Provider as a default.
+ * This class implements a simple, file-based cache.
  *
- * Bootstrapping a more powerful cache for production scenarios is highly recommended.
- *
- * @link https://github.com/matthiasmullie/scrapbook/
+ * Make sure your schedule an e.g. nightly call to {@see cleanExpired()}.
  */
 class FileCache implements CacheInterface
 {
