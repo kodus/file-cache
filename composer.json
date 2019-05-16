@@ -25,7 +25,8 @@
     },
     "require-dev": {
         "codeception/codeception": "^2",
-        "mindplay/simple-cache": "^1.0"
+        "mindplay/simple-cache": "^1.0",
+        "cache/integration-tests": "dev-master"
     },
     "autoload": {
         "psr-4": {

@@ -3,8 +3,11 @@
 namespace Kodus\Cache;
 
 use DateInterval;
+use function file_exists;
 use FilesystemIterator;
 use Generator;
+use function gettype;
+use function is_int;
 use Psr\SimpleCache\CacheInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -148,7 +151,11 @@ class FileCache implements CacheInterface
 
     public function delete($key)
     {
-        return @unlink($this->getPath($key));
+        $this->validateKey($key);
+
+        $path = $this->getPath($key);
+
+        return !file_exists($path) || @unlink($path);
     }
 
     public function clear()
@@ -190,7 +197,12 @@ class FileCache implements CacheInterface
         $ok = true;
 
         foreach ($values as $key => $value) {
+            if (is_int($key)) {
+                $key = (string) $key;
+            }
+
             $this->validateKey($key);
+
             $ok = $this->set($key, $value, $ttl) && $ok;
         }
 
@@ -203,10 +215,15 @@ class FileCache implements CacheInterface
             throw new InvalidArgumentException("keys must be either of type array or Traversable");
         }
 
+        $ok = true;
+
         foreach ($keys as $key) {
             $this->validateKey($key);
-            $this->delete($key);
+
+            $ok = $ok && $this->delete($key);
         }
+
+        return $ok;
     }
 
     public function has($key)
@@ -328,6 +345,20 @@ class FileCache implements CacheInterface
      */
     protected function validateKey($key)
     {
+        if (! is_string($key)) {
+            $type = is_object($key) ? get_class($key) : gettype($key);
+
+            throw new InvalidArgumentException("invalid key type: {$type} given");
+        }
+
+        if ($key === "") {
+            throw new InvalidArgumentException("invalid key: empty string given");
+        }
+
+        if ($key === null) {
+            throw new InvalidArgumentException("invalid key: null given");
+        }
+
         if (preg_match(self::PSR16_RESERVED, $key, $match) === 1) {
             throw new InvalidArgumentException("invalid character in key: {$match[0]}");
         }

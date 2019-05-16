@@ -70,8 +70,8 @@ class FileCacheCest
         $I->assertSame("value1", $this->cache->get("key1"));
         $I->assertSame("value2", $this->cache->get("key2"));
 
-        $I->assertTrue($this->cache->delete("key1"));
-        $I->assertFalse($this->cache->delete("key1"));
+        $I->assertTrue($this->cache->delete("key1"), "deleting existing value");
+        $I->assertTrue($this->cache->delete("key1"), "deleting non-existent value");
 
         $I->assertSame(null, $this->cache->get("key1"));
         $I->assertSame("value2", $this->cache->get("key2"));
