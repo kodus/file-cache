@@ -78,6 +78,12 @@ class FileCache implements CacheInterface
     {
         $path = $this->getPath($key);
 
+        // Does the file exist?
+        if(!file_exists($path))
+        {
+            return $default; // File not found
+        }
+
         $expires_at = @filemtime($path);
 
         if ($expires_at === false) {
