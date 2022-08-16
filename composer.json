@@ -25,7 +25,6 @@
     },
     "require-dev": {
         "codeception/codeception": "^5",
-        "mindplay/simple-cache": "^1.0",
         "cache/integration-tests": "dev-master",
         "codeception/module-asserts": "^3.0"
     },
