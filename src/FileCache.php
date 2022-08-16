@@ -178,10 +178,6 @@ class FileCache implements CacheInterface
 
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        if (! is_array($keys) && ! $keys instanceof Traversable) {
-            throw new InvalidArgumentException("keys must be either of type array or Traversable");
-        }
-
         $values = [];
 
         foreach ($keys as $key) {
@@ -193,10 +189,6 @@ class FileCache implements CacheInterface
 
     public function setMultiple(iterable $values, DateInterval|int|null $ttl = null): bool
     {
-        if (! is_array($values) && ! $values instanceof Traversable) {
-            throw new InvalidArgumentException("keys must be either of type array or Traversable");
-        }
-
         $ok = true;
 
         foreach ($values as $key => $value) {
@@ -214,10 +206,6 @@ class FileCache implements CacheInterface
 
     public function deleteMultiple(iterable $keys): bool
     {
-        if (! is_array($keys) && ! $keys instanceof Traversable) {
-            throw new InvalidArgumentException("keys must be either of type array or Traversable");
-        }
-
         $ok = true;
 
         foreach ($keys as $key) {
