@@ -229,7 +229,7 @@ class FileCache implements CacheInterface
         return $ok;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         return $this->get($key, $this) !== $this;
     }
