@@ -151,7 +151,7 @@ class FileCache implements CacheInterface
         return false;
     }
 
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->validateKey($key);
 
