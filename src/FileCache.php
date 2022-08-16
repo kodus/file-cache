@@ -1,18 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kodus\Cache;
 
-use Cassandra\Date;
 use DateInterval;
-use function file_exists;
 use FilesystemIterator;
 use Generator;
-use function gettype;
-use function is_int;
 use Psr\SimpleCache\CacheInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Traversable;
 
 /**
  * This class implements a simple, file-based cache.
@@ -128,7 +125,7 @@ class FileCache implements CacheInterface
         if (is_int($ttl)) {
             $expires_at = $this->getTime() + $ttl;
         } elseif ($ttl instanceof DateInterval) {
-            $expires_at = date_create_from_format("U", $this->getTime())->add($ttl)->getTimestamp();
+            $expires_at = date_create_from_format("U", (string) $this->getTime())->add($ttl)->getTimestamp();
         } elseif ($ttl === null) {
             $expires_at = $this->getTime() + $this->default_ttl;
         } else {
