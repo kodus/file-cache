@@ -50,6 +50,8 @@ class FileCache implements CacheInterface
      * @param int    $default_ttl default time-to-live (in seconds)
      * @param int    $dir_mode    permission mode for created dirs
      * @param int    $file_mode   permission mode for created files
+     *
+     * @throws InvalidArgumentException
      */
     public function __construct($cache_path, $default_ttl, $dir_mode = 0775, $file_mode = 0664)
     {
@@ -74,7 +76,7 @@ class FileCache implements CacheInterface
         $this->cache_path = $path;
     }
 
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $path = $this->getPath($key);
 
