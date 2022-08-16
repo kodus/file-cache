@@ -160,7 +160,7 @@ class FileCache implements CacheInterface
         return !file_exists($path) || @unlink($path);
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $success = true;
 
