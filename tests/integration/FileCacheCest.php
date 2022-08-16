@@ -76,15 +76,15 @@ class FileCacheCest
         $I->assertSame(null, $this->cache->get("key1"));
         $I->assertSame("value2", $this->cache->get("key2"));
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->set("key@", "value1");
         });
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->get("key@");
         });
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->delete("key@");
         });
     }
@@ -187,19 +187,19 @@ class FileCacheCest
 
         $I->assertSame(["key1" => "value1", "key2" => "value2", "key3" => false], $results);
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->getMultiple("Invalid type");
         });
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->setMultiple("Invalid type");
         });
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->setMultiple(["Invalid key@" => "value1"]);
         });
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->getMultiple(["Invalid key@"]);
         });
     }
@@ -214,11 +214,11 @@ class FileCacheCest
 
         $I->assertSame("value3", $this->cache->get("key3"));
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->deleteMultiple("Invalid type");
         });
 
-        $I->expectException(InvalidArgumentException::class, function () {
+        $I->expectThrowable(InvalidArgumentException::class, function () {
             $this->cache->deleteMultiple(["Invalid key@"]);
         });
     }
