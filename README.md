@@ -1,7 +1,7 @@
 kodus/file-cache
 ================
 
-[![PHP Version](https://img.shields.io/badge/php-5.6%2B-blue.svg)](https://packagist.org/packages/kodus/file-cache)
+[![PHP Version](https://img.shields.io/badge/php-8.0%2B-blue.svg)](https://packagist.org/packages/kodus/file-cache)
 [![Build Status](https://travis-ci.org/kodus/file-cache.svg?branch=master)](https://travis-ci.org/kodus/file-cache)
 [![Code Coverage](https://scrutinizer-ci.com/g/kodus/file-cache/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/kodus/file-cache/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kodus/file-cache/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kodus/file-cache/?branch=master)
