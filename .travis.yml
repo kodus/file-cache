@@ -1,9 +1,5 @@
 language: php
 
-env:
-  global:
-    - XDEBUG_MODE=coverage
-
 php:
   - 8.0
   - 8.1
@@ -11,8 +7,4 @@ php:
 before_script:
   - 'COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install --prefer-dist --no-interaction'
 
-script: vendor/bin/codecept run --coverage-xml
-
-after_script:
-  - wget https://scrutinizer-ci.com/ocular.phar
-  - php ocular.phar code-coverage:upload --repository=kodus/file-cache --format=php-clover tests/_output/coverage.xml
+script: vendor/bin/codecept run
