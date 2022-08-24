@@ -1,4 +1,4 @@
-class_name: IntegrationTester
+actor: IntegrationTester
 modules:
     enabled:
         - Asserts
