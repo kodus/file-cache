@@ -1,17 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kodus\Cache;
 
 use DateInterval;
-use function file_exists;
 use FilesystemIterator;
 use Generator;
-use function gettype;
-use function is_int;
 use Psr\SimpleCache\CacheInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Traversable;
 
 /**
  * This class implements a simple, file-based cache.
@@ -50,6 +48,8 @@ class FileCache implements CacheInterface
      * @param int    $default_ttl default time-to-live (in seconds)
      * @param int    $dir_mode    permission mode for created dirs
      * @param int    $file_mode   permission mode for created files
+     *
+     * @throws InvalidArgumentException
      */
     public function __construct($cache_path, $default_ttl, $dir_mode = 0775, $file_mode = 0664)
     {
@@ -74,7 +74,7 @@ class FileCache implements CacheInterface
         $this->cache_path = $path;
     }
 
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $path = $this->getPath($key);
 
@@ -109,7 +109,7 @@ class FileCache implements CacheInterface
         return $value;
     }
 
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $path = $this->getPath($key);
 
@@ -125,7 +125,7 @@ class FileCache implements CacheInterface
         if (is_int($ttl)) {
             $expires_at = $this->getTime() + $ttl;
         } elseif ($ttl instanceof DateInterval) {
-            $expires_at = date_create_from_format("U", $this->getTime())->add($ttl)->getTimestamp();
+            $expires_at = date_create_from_format("U", (string) $this->getTime())->add($ttl)->getTimestamp();
         } elseif ($ttl === null) {
             $expires_at = $this->getTime() + $this->default_ttl;
         } else {
@@ -149,7 +149,7 @@ class FileCache implements CacheInterface
         return false;
     }
 
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->validateKey($key);
 
@@ -158,7 +158,7 @@ class FileCache implements CacheInterface
         return !file_exists($path) || @unlink($path);
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $success = true;
 
@@ -173,12 +173,8 @@ class FileCache implements CacheInterface
         return $success;
     }
 
-    public function getMultiple($keys, $default = null)
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        if (! is_array($keys) && ! $keys instanceof Traversable) {
-            throw new InvalidArgumentException("keys must be either of type array or Traversable");
-        }
-
         $values = [];
 
         foreach ($keys as $key) {
@@ -188,12 +184,8 @@ class FileCache implements CacheInterface
         return $values;
     }
 
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple(iterable $values, DateInterval|int|null $ttl = null): bool
     {
-        if (! is_array($values) && ! $values instanceof Traversable) {
-            throw new InvalidArgumentException("keys must be either of type array or Traversable");
-        }
-
         $ok = true;
 
         foreach ($values as $key => $value) {
@@ -209,12 +201,8 @@ class FileCache implements CacheInterface
         return $ok;
     }
 
-    public function deleteMultiple($keys)
+    public function deleteMultiple(iterable $keys): bool
     {
-        if (! is_array($keys) && ! $keys instanceof Traversable) {
-            throw new InvalidArgumentException("keys must be either of type array or Traversable");
-        }
-
         $ok = true;
 
         foreach ($keys as $key) {
@@ -226,7 +214,7 @@ class FileCache implements CacheInterface
         return $ok;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         return $this->get($key, $this) !== $this;
     }

@@ -7,6 +7,7 @@ use DateInterval;
 use IntegrationTester;
 use Kodus\Cache\InvalidArgumentException;
 use Kodus\Cache\Test\TestableFileCache;
+use TypeError;
 
 class FileCacheCest
 {
@@ -187,11 +188,11 @@ class FileCacheCest
 
         $I->assertSame(["key1" => "value1", "key2" => "value2", "key3" => false], $results);
 
-        $I->expectThrowable(InvalidArgumentException::class, function () {
+        $I->expectThrowable(TypeError::class, function () {
             $this->cache->getMultiple("Invalid type");
         });
 
-        $I->expectThrowable(InvalidArgumentException::class, function () {
+        $I->expectThrowable(TypeError::class, function () {
             $this->cache->setMultiple("Invalid type");
         });
 
@@ -214,7 +215,7 @@ class FileCacheCest
 
         $I->assertSame("value3", $this->cache->get("key3"));
 
-        $I->expectThrowable(InvalidArgumentException::class, function () {
+        $I->expectThrowable(TypeError::class, function () {
             $this->cache->deleteMultiple("Invalid type");
         });
 
