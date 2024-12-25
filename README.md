@@ -24,6 +24,21 @@ To reduce storage overhead and speed up expiration time-checks, the file modific
 
 ## Usage
 
+Use the following example as a guideline:
+
+```php
+   $absolutePathToCacheDir = realpath(__DIR__ . '/../../cache/api-cache/');
+   $ttl = 86400;
+   $cacher = new \Kodus\Cache\FileCache(
+       $absolutePathToCacheDir,
+       $ttl
+   );
+```
+
+There are also optional parameters: `$dir_mode = 0775, $file_mode = 0664`.
+
+Then pass this `$cacher` object to whatever uses a PSR-16 cacher.
+
 Please refer to the [PSR-16 spec](https://packagist.org/packages/psr/simple-cache) for the API description.
 
 ### Security
