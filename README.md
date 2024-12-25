@@ -48,3 +48,8 @@ A public method `cleanExpired()` will flush expired entries - depending on your 
      set up a cron-job to call the `cleanExpired()` method periodically, say, once per day.
 
 For cache-entries with dynamic keys in the millions, as mentioned, you probably don't want a file-based cache.
+
+## License
+
+MIT license. Please see the [license file](LICENSE) for more information.
+
