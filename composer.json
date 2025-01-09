@@ -38,5 +38,8 @@
             "Kodus\\Cache\\Test\\": "tests/",
             "Kodus\\Cache\\Test\\Integration\\": "tests/integration/"
         }
+    },
+    "scripts": {
+        "test": "codecept run"
     }
 }
