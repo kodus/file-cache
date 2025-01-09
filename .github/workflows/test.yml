@@ -1,6 +1,6 @@
 name: Codeception tests
 
-on: [push]
+on: [ push ]
 
 jobs:
   build:
@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ ubuntu-latest, ubuntu-20.04 ]
-        php: [ '8.0', '8.1' ]
+        php: [ '8.0', '8.1', '8.4' ]
 
     steps:
       - uses: actions/checkout@master
@@ -25,4 +25,4 @@ jobs:
         run: composer install
 
       - name: Run tests
-        run: php vendor/bin/codecept run
+        run: composer run test
